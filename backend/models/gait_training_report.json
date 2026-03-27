@@ -1,0 +1,77 @@
+{
+  "timestamp_utc": "2026-03-27T12:57:26.489776+00:00",
+  "table_mode": "subject_mean",
+  "selection_metric": "auc_roc",
+  "selection_target": "loso_auc",
+  "scaler": "RobustScaler",
+  "scaler_name": "robust",
+  "best_params": {
+    "n_estimators": 300,
+    "max_depth": 3,
+    "learning_rate": 0.05,
+    "subsample": 0.7,
+    "gamma": 0.1,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 3,
+    "reg_alpha": 0.1,
+    "reg_lambda": 2.0
+  },
+  "best_cv_auc_roc": 0.8034628717387338,
+  "holdout": {
+    "accuracy": 0.696969696969697,
+    "balanced_accuracy": 0.6888888888888889,
+    "precision": 0.7,
+    "recall": 0.7777777777777778,
+    "f1": 0.7368421052631579,
+    "pr_auc": 0.8471338697028001,
+    "auc_roc": 0.7962962962962963,
+    "confusion_matrix": [
+      [
+        9,
+        6
+      ],
+      [
+        4,
+        14
+      ]
+    ],
+    "n_test": 33
+  },
+  "loso": [
+    {
+      "accuracy": 0.7446808510638298,
+      "balanced_accuracy": 0.7193486590038314,
+      "precision": 0.7741935483870968,
+      "recall": 0.8275862068965517,
+      "f1": 0.8,
+      "pr_auc": 0.9212608322888605,
+      "auc_roc": 0.8639846743295019,
+      "study": "Ga",
+      "n_test": 47
+    },
+    {
+      "accuracy": 0.7222222222222222,
+      "balanced_accuracy": 0.7110344827586207,
+      "precision": 0.6944444444444444,
+      "recall": 0.8620689655172413,
+      "f1": 0.7692307692307693,
+      "pr_auc": 0.8483488732000743,
+      "auc_roc": 0.8055172413793104,
+      "study": "Ju",
+      "n_test": 54
+    },
+    {
+      "accuracy": 0.703125,
+      "balanced_accuracy": 0.7167487684729064,
+      "precision": 0.8333333333333334,
+      "recall": 0.5714285714285714,
+      "f1": 0.6779661016949152,
+      "pr_auc": 0.7555344510375934,
+      "auc_roc": 0.7408866995073891,
+      "study": "Si",
+      "n_test": 64
+    }
+  ],
+  "model_path": "/Users/adityakharbanda/Downloads/Parkinson-Detection-using-GAIT-Voice-Tapping-Analysis/backend/training/../models/gait_model_subject_mean_robust.pkl",
+  "deploy_model_path": "/Users/adityakharbanda/Downloads/Parkinson-Detection-using-GAIT-Voice-Tapping-Analysis/backend/training/../models/gait_model.pkl"
+}

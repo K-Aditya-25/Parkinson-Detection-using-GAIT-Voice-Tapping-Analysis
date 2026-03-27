@@ -1,0 +1,76 @@
+{
+  "timestamp_utc": "2026-03-27T12:52:41.952423+00:00",
+  "table_mode": "subject_mean",
+  "selection_metric": "auc_roc",
+  "scaler": "StandardScaler",
+  "scaler_name": "standard",
+  "best_params": {
+    "n_estimators": 200,
+    "max_depth": 5,
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "gamma": 0.1,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 3,
+    "reg_alpha": 0.1,
+    "reg_lambda": 2.0
+  },
+  "best_cv_auc_roc": 0.7777777777777779,
+  "holdout": {
+    "accuracy": 0.696969696969697,
+    "balanced_accuracy": 0.6888888888888889,
+    "precision": 0.7,
+    "recall": 0.7777777777777778,
+    "f1": 0.7368421052631579,
+    "pr_auc": 0.8812738809261447,
+    "auc_roc": 0.825925925925926,
+    "confusion_matrix": [
+      [
+        9,
+        6
+      ],
+      [
+        4,
+        14
+      ]
+    ],
+    "n_test": 33
+  },
+  "loso": [
+    {
+      "accuracy": 0.723404255319149,
+      "balanced_accuracy": 0.6915708812260537,
+      "precision": 0.75,
+      "recall": 0.8275862068965517,
+      "f1": 0.7868852459016393,
+      "pr_auc": 0.8987617057679633,
+      "auc_roc": 0.8352490421455939,
+      "study": "Ga",
+      "n_test": 47
+    },
+    {
+      "accuracy": 0.7037037037037037,
+      "balanced_accuracy": 0.6910344827586207,
+      "precision": 0.6756756756756757,
+      "recall": 0.8620689655172413,
+      "f1": 0.7575757575757576,
+      "pr_auc": 0.8535161293654261,
+      "auc_roc": 0.8013793103448276,
+      "study": "Ju",
+      "n_test": 54
+    },
+    {
+      "accuracy": 0.71875,
+      "balanced_accuracy": 0.7310344827586206,
+      "precision": 0.84,
+      "recall": 0.6,
+      "f1": 0.7,
+      "pr_auc": 0.7485039662600104,
+      "auc_roc": 0.7152709359605911,
+      "study": "Si",
+      "n_test": 64
+    }
+  ],
+  "model_path": "/Users/adityakharbanda/Downloads/Parkinson-Detection-using-GAIT-Voice-Tapping-Analysis/backend/training/../models/gait_model_subject_mean_standard.pkl",
+  "deploy_model_path": null
+}

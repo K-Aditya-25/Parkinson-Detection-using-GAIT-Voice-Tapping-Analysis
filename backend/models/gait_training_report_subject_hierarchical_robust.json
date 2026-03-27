@@ -1,0 +1,76 @@
+{
+  "timestamp_utc": "2026-03-27T12:52:01.970281+00:00",
+  "table_mode": "subject_hierarchical",
+  "selection_metric": "auc_roc",
+  "scaler": "RobustScaler",
+  "scaler_name": "robust",
+  "best_params": {
+    "n_estimators": 100,
+    "max_depth": 4,
+    "learning_rate": 0.1,
+    "subsample": 0.7,
+    "gamma": 0,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 3,
+    "reg_alpha": 0.1,
+    "reg_lambda": 2.0
+  },
+  "best_cv_auc_roc": 0.7967676767676768,
+  "holdout": {
+    "accuracy": 0.6666666666666666,
+    "balanced_accuracy": 0.6611111111111111,
+    "precision": 0.6842105263157895,
+    "recall": 0.7222222222222222,
+    "f1": 0.7027027027027027,
+    "pr_auc": 0.8694606633031127,
+    "auc_roc": 0.8111111111111111,
+    "confusion_matrix": [
+      [
+        9,
+        6
+      ],
+      [
+        5,
+        13
+      ]
+    ],
+    "n_test": 33
+  },
+  "loso": [
+    {
+      "accuracy": 0.7446808510638298,
+      "balanced_accuracy": 0.7193486590038314,
+      "precision": 0.7741935483870968,
+      "recall": 0.8275862068965517,
+      "f1": 0.8,
+      "pr_auc": 0.8987661637238216,
+      "auc_roc": 0.839080459770115,
+      "study": "Ga",
+      "n_test": 47
+    },
+    {
+      "accuracy": 0.6851851851851852,
+      "balanced_accuracy": 0.6710344827586207,
+      "precision": 0.6578947368421053,
+      "recall": 0.8620689655172413,
+      "f1": 0.746268656716418,
+      "pr_auc": 0.8271786971509159,
+      "auc_roc": 0.7806896551724138,
+      "study": "Ju",
+      "n_test": 54
+    },
+    {
+      "accuracy": 0.625,
+      "balanced_accuracy": 0.645320197044335,
+      "precision": 0.7894736842105263,
+      "recall": 0.42857142857142855,
+      "f1": 0.5555555555555556,
+      "pr_auc": 0.7524688748438669,
+      "auc_roc": 0.729064039408867,
+      "study": "Si",
+      "n_test": 64
+    }
+  ],
+  "model_path": "/Users/adityakharbanda/Downloads/Parkinson-Detection-using-GAIT-Voice-Tapping-Analysis/backend/training/../models/gait_model_subject_hierarchical_robust.pkl",
+  "deploy_model_path": null
+}
