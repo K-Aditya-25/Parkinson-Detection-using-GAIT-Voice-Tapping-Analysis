@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkInsight — Early Parkinson's Screening</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <link rel="stylesheet" href="/dashboard/styles.css">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <div class="logo-mark">P</div>
+        <div>
+            <h1>ParkInsight</h1>
+            <span class="subtitle">Early Parkinson's Disease Screening Suite</span>
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="btn btn-ghost" onclick="resetAll()">&#8635; New Patient</button>
+        <div class="connection-status" id="connStatus">
+            <span class="dot"></span><span id="connLabel">Connecting...</span>
+        </div>
+    </div>
+</header>
+
+<main>
+    <!-- Top row -->
+    <div class="top-row">
+        <!-- Test status cards -->
+        <div class="status-cards">
+            <div class="status-card" id="gaitStatusCard">
+                <div class="status-icon gait-icon">&#127939;</div>
+                <div class="status-body">
+                    <div class="status-label">Gait Test</div>
+                    <div class="status-value" id="gaitStatusText">Waiting...</div>
+                    <div class="status-bar-wrap"><div class="status-bar-fill" id="gaitBar" style="width:0%"></div></div>
+                </div>
+                <div class="status-badge waiting" id="gaitBadge">—</div>
+            </div>
+            <div class="status-card" id="tappingStatusCard">
+                <div class="status-icon tap-icon">&#9757;</div>
+                <div class="status-body">
+                    <div class="status-label">Tapping Test</div>
+                    <div class="status-value" id="tappingStatusText">Waiting...</div>
+                    <div class="status-bar-wrap"><div class="status-bar-fill" id="tappingBar" style="width:0%"></div></div>
+                </div>
+                <div class="status-badge waiting" id="tappingBadge">—</div>
+            </div>
+            <div class="status-card" id="voiceStatusCard">
+                <div class="status-icon voice-icon">&#127908;</div>
+                <div class="status-body">
+                    <div class="status-label">Voice Test</div>
+                    <div class="status-value" id="voiceStatusText">Waiting...</div>
+                    <div class="status-bar-wrap"><div class="status-bar-fill" id="voiceBar" style="width:0%"></div></div>
+                </div>
+                <div class="status-badge waiting" id="voiceBadge">—</div>
+            </div>
+        </div>
+
+        <!-- QR card -->
+        <div class="qr-card">
+            <div class="qr-title">Scan with Phone</div>
+            <div id="qrCode"></div>
+            <div class="qr-url" id="qrUrl">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Combined Risk -->
+    <section class="risk-section">
+        <div class="risk-left">
+            <div class="risk-heading">Combined Risk Score</div>
+            <div class="risk-score-wrap">
+                <svg class="risk-gauge" viewBox="0 0 200 110">
+                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e9ecef" stroke-width="18" stroke-linecap="round"/>
+                    <path id="gaugeFill" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#28a745" stroke-width="18" stroke-linecap="round" stroke-dasharray="0 251.2" style="transition:all 1s ease"/>
+                    <text x="100" y="88" text-anchor="middle" class="gauge-pct" id="gaugePct">--</text>
+                    <text x="100" y="105" text-anchor="middle" class="gauge-label" id="gaugeLabel">No tests yet</text>
+                </svg>
+            </div>
+        </div>
+        <div class="risk-right">
+            <div class="risk-breakdown" id="riskBreakdown">
+                <div class="breakdown-placeholder">Complete tests on the left to see combined score</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="charts-row">
+        <div class="chart-card">
+            <div class="chart-header">
+                <span class="chart-title">Gait Accelerometer Signal</span>
+                <span class="chart-badge" id="gaitChartBadge"></span>
+            </div>
+            <div class="chart-body">
+                <canvas id="gaitSignalChart"></canvas>
+                <div class="chart-empty" id="gaitChartEmpty">Walk 30 seconds to see your gait waveform here</div>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header">
+                <span class="chart-title">AI Explanation (SHAP)</span>
+                <span class="chart-badge">XGBoost</span>
+            </div>
+            <div class="chart-body">
+                <canvas id="shapChart"></canvas>
+                <div class="chart-empty" id="shapChartEmpty">SHAP feature importance will appear after gait test</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gait Feature Cards -->
+    <section class="card-section" id="featuresSection" style="display:none">
+        <div class="section-header">
+            <h2>Gait Feature Breakdown</h2>
+            <span class="section-badge">Compared to healthy reference ranges</span>
+        </div>
+        <div class="feature-grid" id="featureGrid"></div>
+    </section>
+
+    <!-- Tapping + Voice row -->
+    <section class="tapping-voice-row" id="tappingVoiceRow" style="display:none">
+        <div class="chart-card" id="tappingSection">
+            <div class="chart-header">
+                <span class="chart-title">Tap Interval Rhythm</span>
+                <span class="chart-badge" id="tappingRiskBadge"></span>
+            </div>
+            <div class="chart-body" style="height:220px">
+                <canvas id="tapIntervalChart"></canvas>
+            </div>
+            <div class="feature-grid mini" id="tappingFeatureGrid" style="margin-top:16px"></div>
+        </div>
+        <div class="chart-card" id="voiceSection" style="display:none">
+            <div class="chart-header">
+                <span class="chart-title">Voice Analysis</span>
+                <span class="chart-badge" id="voiceRiskBadge"></span>
+            </div>
+            <div class="voice-result" id="voiceResult"></div>
+        </div>
+    </section>
+
+    <!-- Demo + Upload -->
+    <section class="demo-section">
+        <div class="demo-left">
+            <div class="demo-title">Demo Scenarios</div>
+            <div class="demo-buttons">
+                <button class="demo-btn healthy" onclick="loadDemo('healthy')">
+                    <span class="demo-dot"></span>Healthy Walk
+                </button>
+                <button class="demo-btn early" onclick="loadDemo('early_pd')">
+                    <span class="demo-dot"></span>Early PD
+                </button>
+                <button class="demo-btn advanced" onclick="loadDemo('advanced_pd')">
+                    <span class="demo-dot"></span>Advanced PD
+                </button>
+            </div>
+        </div>
+        <div class="demo-right">
+            <div class="demo-title">Upload Phyphox CSV</div>
+            <label class="upload-btn">
+                &#8679; Upload CSV
+                <input type="file" accept=".csv" onchange="uploadCSV(event)" style="display:none">
+            </label>
+        </div>
+    </section>
+
+    <footer>
+        <span>&#9888;</span> ParkInsight is a <strong>prototype screening tool</strong> — not a clinical diagnosis. Always consult a neurologist.
+    </footer>
+</main>
+
+<script src="/dashboard/app.js"></script>
+</body>
+</html>

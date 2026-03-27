@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ParkInsight</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --blue:   #0d6efd;
+            --green:  #198754;
+            --red:    #dc3545;
+            --amber:  #fd7e14;
+            --purple: #6f42c1;
+            --gray:   #6c757d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f4f8;
+            color: #1a2332;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0a4fd6, #0d6efd);
+            color: white;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-logo {
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .header h1 { font-size: 18px; font-weight: 800; }
+        .header p  { font-size: 11px; opacity: .8; }
+
+        /* Server bar */
+        .server-bar {
+            background: white;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .server-bar label { font-size: 12px; font-weight: 700; color: var(--gray); white-space: nowrap; }
+        .server-bar input {
+            flex: 1;
+            padding: 7px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+        .conn-dot { width: 10px; height: 10px; border-radius: 50%; background: #adb5bd; transition: background .3s; flex-shrink: 0; }
+        .conn-dot.live { background: #4ade80; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .tab {
+            flex: 1;
+            padding: 11px 6px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all .2s;
+            user-select: none;
+        }
+        .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .screen { display: none; width: 100%; max-width: 380px; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+        }
+        .card h2 { font-size: 17px; font-weight: 800; margin-bottom: 12px; }
+        .card ol { padding-left: 18px; font-size: 14px; line-height: 1.9; color: #374151; }
+        .card li strong { color: #111; }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            max-width: 320px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: all .15s;
+            text-align: center;
+        }
+        .btn:active { transform: scale(.96); }
+        .btn-blue   { background: var(--blue);   color: white; }
+        .btn-red    { background: var(--red);    color: white; }
+        .btn-green  { background: var(--green);  color: white; }
+        .btn-purple { background: var(--purple); color: white; }
+        .btn-gray   { background: #e9ecef; color: #374151; }
+
+        /* Timer */
+        .timer {
+            font-size: 72px;
+            font-weight: 900;
+            color: var(--blue);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+        .timer.red { color: var(--red); }
+
+        .rec-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff0f0;
+            color: var(--red);
+            font-weight: 700;
+            font-size: 14px;
+            padding: 7px 16px;
+            border-radius: 99px;
+        }
+        .rec-dot {
+            width: 10px; height: 10px;
+            background: var(--red);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+        .progress-wrap {
+            width: 100%;
+            max-width: 280px;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--blue);
+            border-radius: 4px;
+            transition: width .3s;
+        }
+
+        .sample-lbl { font-size: 12px; color: var(--gray); }
+
+        /* Result card */
+        .result-card {
+            background: white;
+            border-radius: 14px;
+            padding: 28px 20px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+        }
+        .result-card .big-icon { font-size: 52px; }
+        .result-card h2 { font-size: 20px; font-weight: 800; margin: 10px 0 6px; }
+        .result-card p  { font-size: 14px; color: var(--gray); }
+        .result-card.error { border: 2px solid var(--red); }
+
+        /* Tap buttons */
+        .tap-area {
+            display: flex;
+            gap: 14px;
+            width: 100%;
+        }
+        .tap-btn {
+            flex: 1;
+            height: 170px;
+            border-radius: 16px;
+            border: 3px solid var(--blue);
+            background: #e8f0ff;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--blue);
+            cursor: pointer;
+            transition: all .08s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .tap-btn.flash { background: var(--blue); color: white; transform: scale(.93); }
+
+        .tap-counter {
+            font-size: 56px;
+            font-weight: 900;
+            color: var(--blue);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Voice */
+        .voice-area {
+            width: 100%;
+            max-width: 280px;
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+        }
+        .voice-wave {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 48px;
+        }
+        .voice-bar {
+            width: 6px;
+            border-radius: 3px;
+            background: var(--purple);
+            transition: height .1s;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-logo">P</div>
+    <div>
+        <h1>ParkInsight</h1>
+        <p>Early Parkinson's Screening</p>
+    </div>
+</div>
+
+<div class="server-bar">
+    <label>Server IP</label>
+    <input type="text" id="serverIp" placeholder="192.168.x.x:5000" inputmode="url">
+    <div class="conn-dot" id="connDot"></div>
+</div>
+
+<div class="tabs">
+    <div class="tab active" id="tabGait"    onclick="switchTab('gait')">🚶 Gait</div>
+    <div class="tab"        id="tabTapping" onclick="switchTab('tapping')">👆 Tapping</div>
+    <div class="tab"        id="tabVoice"   onclick="switchTab('voice')">🎙 Voice</div>
+</div>
+
+<div class="content">
+
+    <!-- ═══════════ GAIT ═══════════ -->
+    <div id="gait-instructions" class="screen active">
+        <div class="card">
+            <h2>🚶 Walking Gait Test</h2>
+            <ol>
+                <li>Enter the <strong>Server IP</strong> above</li>
+                <li>Put your phone in your <strong>trouser pocket</strong></li>
+                <li>Tap <strong>Start Walking</strong></li>
+                <li>Walk normally for <strong>30 seconds</strong></li>
+                <li>Test stops automatically</li>
+            </ol>
+        </div>
+        <button class="btn btn-blue" onclick="startGait()">▶ Start Walking</button>
+    </div>
+
+    <div id="gait-recording" class="screen">
+        <div class="rec-pill"><div class="rec-dot"></div> Recording...</div>
+        <div class="timer" id="gaitTimer">0:00</div>
+        <div class="progress-wrap"><div class="progress-fill" id="gaitProg" style="width:0%"></div></div>
+        <div class="sample-lbl" id="sampleCount">0 samples</div>
+        <button class="btn btn-red" onclick="stopGait()">⏹ Stop Early</button>
+    </div>
+
+    <div id="gait-sending" class="screen">
+        <div class="result-card">
+            <div class="big-icon">📡</div>
+            <h2>Sending data...</h2>
+            <p>Please wait</p>
+        </div>
+    </div>
+
+    <div id="gait-done" class="screen">
+        <div class="result-card">
+            <div class="big-icon">✅</div>
+            <h2>Gait Data Sent!</h2>
+            <p id="gaitResultText">Check the dashboard for results.</p>
+        </div>
+        <button class="btn btn-gray" onclick="resetGait()">↩ Test Again</button>
+    </div>
+
+    <div id="gait-error" class="screen">
+        <div class="result-card error">
+            <div class="big-icon">⚠️</div>
+            <h2>Error</h2>
+            <p id="gaitErrorText"></p>
+        </div>
+        <button class="btn btn-blue" onclick="resetGait()">Try Again</button>
+    </div>
+
+    <!-- ═══════════ TAPPING ═══════════ -->
+    <div id="tap-instructions" class="screen">
+        <div class="card">
+            <h2>👆 Finger Tapping Test</h2>
+            <ol>
+                <li>Tap <strong>Start</strong> to begin</li>
+                <li>Alternate between <strong>L</strong> and <strong>R</strong></li>
+                <li>Tap as <strong>fast</strong> as you can</li>
+                <li>Lasts <strong>10 seconds</strong></li>
+            </ol>
+        </div>
+        <button class="btn btn-blue" onclick="startTapping()">▶ Start Tapping</button>
+    </div>
+
+    <div id="tap-recording" class="screen">
+        <div class="rec-pill"><div class="rec-dot"></div> Tap!</div>
+        <div class="timer red" id="tapTimer">10</div>
+        <div class="tap-area">
+            <button class="tap-btn" id="tapL"
+                ontouchstart="onTap(event,'L')" onmousedown="onTap(event,'L')">L</button>
+            <button class="tap-btn" id="tapR"
+                ontouchstart="onTap(event,'R')" onmousedown="onTap(event,'R')">R</button>
+        </div>
+        <div class="tap-counter" id="tapCount">0</div>
+        <div class="sample-lbl">taps recorded</div>
+    </div>
+
+    <div id="tap-done" class="screen">
+        <div class="result-card">
+            <div class="big-icon">✅</div>
+            <h2>Tapping Data Sent!</h2>
+            <p id="tapResultText">Check the dashboard for results.</p>
+        </div>
+        <button class="btn btn-gray" onclick="resetTapping()">↩ Test Again</button>
+    </div>
+
+    <!-- ═══════════ VOICE ═══════════ -->
+    <div id="voice-instructions" class="screen">
+        <div class="card">
+            <h2>🎙 Voice Test</h2>
+            <ol>
+                <li>Tap <strong>Start Recording</strong></li>
+                <li>Say <strong>"Aahhh"</strong> in a steady voice</li>
+                <li>Hold for <strong>5 seconds</strong></li>
+                <li>Tap <strong>Stop</strong> when done</li>
+            </ol>
+        </div>
+        <button class="btn btn-purple" onclick="startVoice()">🎙 Start Recording</button>
+    </div>
+
+    <div id="voice-recording" class="screen">
+        <div class="rec-pill" style="background:#f3e8ff;color:#6f42c1">
+            <div class="rec-dot" style="background:#6f42c1"></div> Recording voice...
+        </div>
+        <div class="timer" style="color:#6f42c1" id="voiceTimer">5</div>
+        <div class="voice-area">
+            <div class="voice-wave" id="voiceWave">
+                <div class="voice-bar" style="height:20%"></div>
+                <div class="voice-bar" style="height:60%"></div>
+                <div class="voice-bar" style="height:40%"></div>
+                <div class="voice-bar" style="height:80%"></div>
+                <div class="voice-bar" style="height:30%"></div>
+                <div class="voice-bar" style="height:70%"></div>
+                <div class="voice-bar" style="height:50%"></div>
+                <div class="voice-bar" style="height:90%"></div>
+            </div>
+            <div class="sample-lbl">Say "Aahhh" steadily</div>
+        </div>
+        <button class="btn btn-red" onclick="stopVoice()">⏹ Stop Early</button>
+    </div>
+
+    <div id="voice-sending" class="screen">
+        <div class="result-card">
+            <div class="big-icon">📡</div>
+            <h2>Analysing voice...</h2>
+            <p>Please wait</p>
+        </div>
+    </div>
+
+    <div id="voice-done" class="screen">
+        <div class="result-card">
+            <div class="big-icon">✅</div>
+            <h2>Voice Analysed!</h2>
+            <p id="voiceResultText">Check the dashboard for results.</p>
+        </div>
+        <button class="btn btn-gray" onclick="resetVoice()">↩ Test Again</button>
+    </div>
+
+    <div id="voice-error" class="screen">
+        <div class="result-card error">
+            <div class="big-icon">⚠️</div>
+            <h2>Voice Error</h2>
+            <p id="voiceErrorText"></p>
+        </div>
+        <button class="btn btn-purple" onclick="resetVoice()">Try Again</button>
+    </div>
+
+</div><!-- /content -->
+
+<script>
+// ─── State ──────────────────────────────────────────────────────────────────
+let sensorData = [], startTime, gaitInterval;
+let tapTimestamps = [], tapInterval;
+let mediaRecorder, audioChunks = [], voiceInterval, voiceAnimInterval;
+let currentTab = 'gait';
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function getBase() {
+    const v = document.getElementById('serverIp').value.trim();
+    if (!v) return null;
+    return v.startsWith('http') ? v : `http://${v}`;
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    ['gait','tapping','voice'].forEach(t => {
+        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1))
+            .classList.toggle('active', t === tab);
+    });
+    showScreen(tab === 'gait' ? 'gait-instructions' :
+               tab === 'tapping' ? 'tap-instructions' : 'voice-instructions');
+}
+
+// Auto-fill IP from page URL
+(function() {
+    const host = window.location.host;
+    document.getElementById('serverIp').value = host || 'localhost:5000';
+    setInterval(async () => {
+        const base = getBase();
+        if (!base) return;
+        try {
+            const r = await fetch(base + '/api/results/latest', { signal: AbortSignal.timeout(2000) });
+            document.getElementById('connDot').className = 'conn-dot' + (r.ok ? ' live' : '');
+        } catch { document.getElementById('connDot').className = 'conn-dot'; }
+    }, 3000);
+})();
+
+// ─── GAIT TEST ────────────────────────────────────────────────────────────────
+async function startGait() {
+    if (!getBase()) { alert('Enter server IP first.'); return; }
+
+    if (typeof DeviceMotionEvent === 'undefined') {
+        document.getElementById('gaitErrorText').textContent =
+            'Motion sensors not available. Use Chrome on Android, or Safari on iOS over HTTPS.';
+        showScreen('gait-error'); return;
+    }
+
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        try {
+            const perm = await DeviceMotionEvent.requestPermission();
+            if (perm !== 'granted') {
+                document.getElementById('gaitErrorText').textContent =
+                    'Motion permission denied.\n\n' +
+                    'iOS requires HTTPS. Restart server with:\n  python backend/app.py --https\n' +
+                    'Then open https://<ip>:5000/phone and accept the certificate.';
+                showScreen('gait-error'); return;
+            }
+        } catch(e) {
+            document.getElementById('gaitErrorText').textContent = 'Permission error: ' + e.message;
+            showScreen('gait-error'); return;
+        }
+    }
+
+    sensorData = [];
+    startTime = Date.now();
+    showScreen('gait-recording');
+    window.addEventListener('devicemotion', handleMotion);
+
+    gaitInterval = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const s = Math.floor(elapsed);
+        document.getElementById('gaitTimer').textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+        document.getElementById('gaitProg').style.width = Math.min(elapsed/30*100, 100) + '%';
+        document.getElementById('sampleCount').textContent = sensorData.length + ' samples';
+        if (elapsed >= 30) stopGait();
+    }, 200);
+}
+
+function handleMotion(e) {
+    const elapsed = (Date.now() - startTime) / 1000;
+    const a = e.accelerationIncludingGravity;
+    if (a) sensorData.push({ t: +elapsed.toFixed(4), ax: a.x||0, ay: a.y||0, az: a.z||0 });
+}
+
+function stopGait() {
+    window.removeEventListener('devicemotion', handleMotion);
+    clearInterval(gaitInterval);
+    if (sensorData.length < 50) {
+        document.getElementById('gaitErrorText').textContent =
+            `Only ${sensorData.length} samples. Make sure motion sensors are enabled and you walked for at least 10 seconds.`;
+        showScreen('gait-error'); return;
+    }
+    showScreen('gait-sending');
+    fetch(getBase() + '/api/gait/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sensor_data: sensorData })
+    }).then(r => r.json()).then(result => {
+        if (result.error) {
+            document.getElementById('gaitErrorText').textContent = result.error;
+            showScreen('gait-error');
+        } else {
+            document.getElementById('gaitResultText').textContent =
+                `Risk: ${result.risk_level} (${(result.probability_pd*100).toFixed(1)}% PD)`;
+            showScreen('gait-done');
+        }
+    }).catch(err => {
+        document.getElementById('gaitErrorText').textContent = 'Server error: ' + err.message;
+        showScreen('gait-error');
+    });
+}
+
+function resetGait() { sensorData = []; showScreen('gait-instructions'); }
+
+// ─── TAPPING TEST ─────────────────────────────────────────────────────────────
+function startTapping() {
+    if (!getBase()) { alert('Enter server IP first.'); return; }
+    tapTimestamps = [];
+    document.getElementById('tapCount').textContent = '0';
+    showScreen('tap-recording');
+    let remaining = 10;
+    document.getElementById('tapTimer').textContent = remaining;
+    tapInterval = setInterval(() => {
+        remaining--;
+        document.getElementById('tapTimer').textContent = remaining;
+        if (remaining <= 0) { clearInterval(tapInterval); sendTaps(); }
+    }, 1000);
+}
+
+function onTap(e, side) {
+    e.preventDefault();
+    tapTimestamps.push(Date.now());
+    document.getElementById('tapCount').textContent = tapTimestamps.length;
+    const btn = document.getElementById('tap' + side);
+    btn.classList.add('flash');
+    setTimeout(() => btn.classList.remove('flash'), 90);
+}
+
+async function sendTaps() {
+    if (tapTimestamps.length < 6) { alert('Not enough taps. Try again.'); showScreen('tap-instructions'); return; }
+    try {
+        const r = await fetch(getBase() + '/api/tapping/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tap_data: tapTimestamps })
+        });
+        const d = await r.json();
+        document.getElementById('tapResultText').textContent =
+            `Risk: ${d.risk_level} (Score: ${(d.risk_score*100).toFixed(0)}%)`;
+        showScreen('tap-done');
+    } catch(e) {
+        alert('Send failed: ' + e.message);
+        showScreen('tap-instructions');
+    }
+}
+
+function resetTapping() { tapTimestamps = []; showScreen('tap-instructions'); }
+
+// ─── VOICE TEST ───────────────────────────────────────────────────────────────
+async function startVoice() {
+    if (!getBase()) { alert('Enter server IP first.'); return; }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.start(100);
+        showScreen('voice-recording');
+
+        // Animate bars
+        voiceAnimInterval = setInterval(() => {
+            document.querySelectorAll('.voice-bar').forEach(b => {
+                b.style.height = (15 + Math.random() * 85) + '%';
+            });
+        }, 120);
+
+        let remaining = 5;
+        document.getElementById('voiceTimer').textContent = remaining;
+        voiceInterval = setInterval(() => {
+            remaining--;
+            document.getElementById('voiceTimer').textContent = remaining;
+            if (remaining <= 0) stopVoice();
+        }, 1000);
+
+    } catch(e) {
+        document.getElementById('voiceErrorText').textContent =
+            'Microphone access denied. Please allow microphone permission and try again.';
+        showScreen('voice-error');
+    }
+}
+
+function stopVoice() {
+    clearInterval(voiceInterval);
+    clearInterval(voiceAnimInterval);
+    if (!mediaRecorder) return;
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    showScreen('voice-sending');
+
+    setTimeout(() => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const fd = new FormData();
+        fd.append('audio', blob, 'voice.webm');
+        fetch(getBase() + '/api/voice/analyze', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(d => {
+                document.getElementById('voiceResultText').textContent =
+                    `Risk: ${d.risk_level} (${(d.probability_pd*100).toFixed(1)}% PD)`;
+                showScreen('voice-done');
+            })
+            .catch(err => {
+                document.getElementById('voiceErrorText').textContent = 'Analysis failed: ' + err.message;
+                showScreen('voice-error');
+            });
+    }, 400);
+}
+
+function resetVoice() { audioChunks = []; showScreen('voice-instructions'); }
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import xgboost, shap, sklearn, scipy, flask; print\\(''All deps available''\\)\")",
+      "Bash(pip install:*)",
+      "Bash(python backend/training/train_gait_model.py)",
+      "Bash(python backend/training/train_voice_model.py)",
+      "Bash(python backend/demo_data/generate_demos.py)",
+      "Bash(timeout 8 python backend/app.py)",
+      "Bash(python -c \":*)",
+      "Bash(taskkill //F //IM python.exe)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(openssl version:*)",
+      "Bash(taskkill /F /IM python.exe)",
+      "Bash(timeout /t)",
+      "Bash(curl -s http://localhost:5000/api/results/latest)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''''Server OK:'''', list\\(d.keys\\(\\)\\)\\)\")",
+      "Bash(curl -s -X POST http://localhost:5000/api/demo/early_pd)",
+      "Bash(curl -s -X POST http://localhost:5000/api/demo/advanced_pd)",
+      "Bash(ngrok version:*)",
+      "Bash(winget list:*)",
+      "Bash(python -c \"from cryptography import x509; print\\(''cryptography ok''\\)\")",
+      "Bash(python backend/gen_cert.py)",
+      "Bash(curl -sk https://localhost:5000/api/results/latest)",
+      "Bash(netstat -ano)",
+      "Bash(curl -s http://localhost:5000/api/server-info)"
+    ]
+  }
+}
